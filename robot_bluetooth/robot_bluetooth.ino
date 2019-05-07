@@ -63,11 +63,11 @@ void loop() {
 
     else if (c == 'w') {
       digitalWrite(DIR1pin, LOW);
-      ledcWrite(PWM1channel,100);
+      ledcWrite(PWM1channel, 256);
     }
     else if (c == 's') {
       digitalWrite(DIR1pin, HIGH);
-      ledcWrite(PWM1channel, 100);
+      ledcWrite(PWM1channel, 256);
     }
     else if (c == 'b') {
       ledcWrite(PWM1channel, 0);

@@ -54,6 +54,10 @@ def on_key_down(key): #key names are saved in CAPS
         ser.write(b's')
     if key.name == 'B':
         ser.write(b'b')
+    if key.name == 'O':
+        ser.write(b'o')
+    if key.name == 'P':
+        ser.write(b'p')
 
 
-ser = serial.Serial('/dev/cu.SLAB_USBtoUART',9600)
+ser = serial.Serial('COM5',9600)
