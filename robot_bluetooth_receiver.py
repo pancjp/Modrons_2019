@@ -26,6 +26,7 @@ def update(dt):
         line = ser.read_until().strip() #strip() removes the \r\n
         values = line.decode('ascii').split(' ')
         #print(values)
+        print(values)
         if(values[0] == 'x'):
             x[int(values[1])] = int(values[2])
             #print(x)
@@ -58,6 +59,7 @@ def on_key_down(key): #key names are saved in CAPS
         ser.write(b'o')
     if key.name == 'P':
         ser.write(b'p')
-
+    if key.name == 'R':
+        ser.write(b'r')
 
 ser = serial.Serial('/dev/cu.ARNIE-ESP32SPP',9600)

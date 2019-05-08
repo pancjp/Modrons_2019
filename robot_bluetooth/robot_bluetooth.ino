@@ -4,11 +4,15 @@
 #include <stdio.h>
 #include <math.h>
 #include <dummy.h>
+#include <VL53L1X.h> //LIDAR sensor library
 
 BluetoothSerial SerialBT;
 
-TwoWire I2C_ONE = TwoWire(0); //INIT LIDAR1 I2C BITBANG PIN
-TwoWire I2C_TWO = TwoWire(1); //INIT LIDAR2 I2C BITBANG PIN
+//TwoWire I2C_ONE = TwoWire(0); //INIT LIDAR1 I2C BITBANG PIN
+//TwoWire I2C_TWO = TwoWire(1); //INIT LIDAR2 I2C BITBANG PIN
+
+VL53L1X LIDAR_ONE;
+VL53L1X LIDAR_TWO;
 
 int count = 0;
 const int PWM1pin = 14; //LEFT DRIVE MOTOR
@@ -58,11 +62,19 @@ void setup() {
   ledcWrite(PWM3channel,0); // pwm channel, speed 0-255
   digitalWrite(DIR3pin, LOW); // set direction to cw/ccw
   
+  Wire.begin();
+  Wire.setClock(400000);
+  //I2C_ONE.begin(21,22,400000); //LIDAR 1 I2C bus
+  //I2C_TWO.begin(27,33,400000); //LIDAR 2 I2C bus
 
-  I2C_ONE.begin(22,23,400000); //LIDAR 1 I2C bus
-  I2C_TWO.begin(27,33,400000); //LIDAR 2 I2C bus
-
-  
+  LIDAR_ONE.setTimeout(500);
+  if (!LIDAR_ONE.init()) {
+    Serial.println("LIDAR 1 initialization failed");
+    //while(1);
+  }
+  LIDAR_ONE.setDistanceMode(VL53L1X::Long);
+  LIDAR_ONE.setMeasurementTimingBudget(33000);
+  LIDAR_ONE.startContinuous(33);
   
 }
 
@@ -70,6 +82,9 @@ void loop() {
   char c = 0;
   int an = 0;
   int i;
+  int LIDAR_1_RANGE;
+  int LIDAR_2_RANGE;
+
   
   if (Serial.available()) {
     SerialBT.write(Serial.read());
@@ -100,7 +115,6 @@ void loop() {
     else if (c == 'c') {
       SerialBT.println("c 1");
     }
-
     else if (c == 'w') {
       digitalWrite(DIR1pin, LOW);
       ledcWrite(PWM1channel, 256);
@@ -117,6 +131,19 @@ void loop() {
     else if (c == 'b') {
       ledcWrite(PWM1channel, 0);
       ledcWrite(PWM2channel, 0);
+      ledcWrite(PWM3channel, 0);
+    }
+    else if (c=='q') {
+      digitalWrite(DIR3pin, LOW);
+      ledcWrite(PWM3channel, 256);
+    }
+    else if (c == 'e') {
+      digitalWrite(DIR3pin, HIGH);
+      ledcWrite(PWM3channel, 256);
+    }
+    else if (c == 'r') {
+      LIDAR_1_RANGE = LIDAR_ONE.read();
+      SerialBT.println(LIDAR_1_RANGE);
     }
   }
   delay(20);
