@@ -8,6 +8,9 @@ c = 0
 x = [0]*100 # list of size 100 initialized to 0
 analog = 0
 
+sensorValues = []
+
+
 def draw():
     screen.fill((0, c, 0))
     plot(x,10,HEIGHT/2,0,0,255) # data, xpos, ypos, red, green, blue

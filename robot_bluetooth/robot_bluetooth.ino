@@ -11,25 +11,27 @@ BluetoothSerial SerialBT;
 //TwoWire I2C_ONE = TwoWire(0); //INIT LIDAR1 I2C BITBANG PIN
 //TwoWire I2C_TWO = TwoWire(1); //INIT LIDAR2 I2C BITBANG PIN
 
-VL53L1X LIDAR_ONE;
-VL53L1X LIDAR_TWO;
+VL53L1X LIDAR;
 
 int count = 0;
-const int PWM1pin = 14; //LEFT DRIVE MOTOR
-const int DIR1pin = 32;
+#define PWM1pin 14 //LEFT DRIVE MOTOR
+#define DIR1pin 32
 const int PWM1channel = 0;
 
-const int PWM2pin = 15; // RIGHT DRIVE MOTOR
-const int DIR2pin = 12;
+#define PWM2pin 15 // RIGHT DRIVE MOTOR
+#define DIR2pin 12
 const int PWM2channel = 0;
 
-const int PWM3pin = 36; // TRAWLER MOTOR
-const int DIR3pin = 39;
+#define PWM3pin 36 // TRAWLER MOTOR
+#define DIR3pin 39
 const int PWM3channel = 0;
 
 
-const int IR_1pin = A0; // IR SENSORS
-const int IR_2pin = A1;
+//const int IR_1pin = A0; // IR SENSORS
+//const int IR_2pin = A1;
+
+#define LASER_1 27
+#define LASER_2 33
 
 
 
@@ -61,20 +63,27 @@ void setup() {
 
   ledcWrite(PWM3channel,0); // pwm channel, speed 0-255
   digitalWrite(DIR3pin, LOW); // set direction to cw/ccw
+
+
+  
+  //LASER INITIALIZATION
+  pinMode(LASER_1, OUTPUT);
+  digitalWrite(LASER_1, HIGH);
+  pinMode(LASER_2, OUTPUT);
+  digitalWrite(LASER_2, HIGH);
   
   Wire.begin();
   Wire.setClock(400000);
-  //I2C_ONE.begin(21,22,400000); //LIDAR 1 I2C bus
-  //I2C_TWO.begin(27,33,400000); //LIDAR 2 I2C bus
 
-  LIDAR_ONE.setTimeout(500);
-  if (!LIDAR_ONE.init()) {
+  LIDAR.setTimeout(500);
+  if (!LIDAR.init()) {
     Serial.println("LIDAR 1 initialization failed");
     //while(1);
   }
-  LIDAR_ONE.setDistanceMode(VL53L1X::Long);
-  LIDAR_ONE.setMeasurementTimingBudget(33000);
-  LIDAR_ONE.startContinuous(33);
+  LIDAR.setDistanceMode(VL53L1X::Long);
+  LIDAR.setMeasurementTimingBudget(33000);
+  LIDAR.startContinuous(33);
+
   
 }
 
@@ -82,9 +91,11 @@ void loop() {
   char c = 0;
   int an = 0;
   int i;
-  int LIDAR_1_RANGE;
-  int LIDAR_2_RANGE;
+  int LIDAR_RANGE;
+  int PT_1_VOLTAGE;
+  int PT_2_VOLTAGE;
 
+  
   
   if (Serial.available()) {
     SerialBT.write(Serial.read());
@@ -142,8 +153,16 @@ void loop() {
       ledcWrite(PWM3channel, 256);
     }
     else if (c == 'r') {
-      LIDAR_1_RANGE = LIDAR_ONE.read();
-      SerialBT.println(LIDAR_1_RANGE);
+      LIDAR_RANGE = LIDAR.readRangeContinuousMillimeters();
+      SerialBT.print(LIDAR_RANGE);
+      SerialBT.print(" ");
+      PT_1_VOLTAGE = analogRead(A2);
+      PT_2_VOLTAGE = analogRead(A3);
+      SerialBT.print("LASER_1:");
+      SerialBT.print(PT_1_VOLTAGE);
+      SerialBT.print(" ");
+      SerialBT.print("LASER_2:");
+      SerialBT.println(PT_2_VOLTAGE);
     }
   }
   delay(20);
