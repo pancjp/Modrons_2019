@@ -5,13 +5,13 @@
 #include <math.h>
 #include <dummy.h>
 #include <VL53L1X.h> //LIDAR sensor library
+#include <LSM6.h>
+
 
 BluetoothSerial SerialBT;
 
-//TwoWire I2C_ONE = TwoWire(0); //INIT LIDAR1 I2C BITBANG PIN
-//TwoWire I2C_TWO = TwoWire(1); //INIT LIDAR2 I2C BITBANG PIN
-
 VL53L1X LIDAR;
+LSM6 IMU;
 
 int count = 0;
 #define PWM1pin 14 //LEFT DRIVE MOTOR
@@ -26,12 +26,9 @@ const int PWM2channel = 0;
 #define DIR3pin 39
 const int PWM3channel = 0;
 
-
-//const int IR_1pin = A0; // IR SENSORS
-//const int IR_2pin = A1;
-
 #define LASER_1 27
 #define LASER_2 12
+
 
 
 
@@ -39,8 +36,6 @@ void setup() {
   Serial.begin(115200);
   SerialBT.begin("A R N I E"); //Bluetooth device name
   //Serial.println("The device started, now you can pair it with bluetooth!");
-  //pinMode(13,OUTPUT);
-  //digitalWrite(13,LOW);
 
   ledcSetup(PWM1channel,5000,8); // pwm channel, frequency, resolution in bits
   ledcAttachPin(PWM1pin,PWM1channel); // pin, pwm channel
@@ -63,8 +58,6 @@ void setup() {
 
   ledcWrite(PWM3channel,0); // pwm channel, speed 0-255
   digitalWrite(DIR3pin, LOW); // set direction to cw/ccw
-
-
   
   //LASER INITIALIZATION
   pinMode(LASER_1, OUTPUT);
@@ -79,7 +72,7 @@ void setup() {
   if (!LIDAR.init()) {
     Serial.println("LIDAR 1 initialization failed");
     //while(1);
-  }
+    }
   LIDAR.setDistanceMode(VL53L1X::Long);
   LIDAR.setMeasurementTimingBudget(33000);
   LIDAR.startContinuous(33);
@@ -92,8 +85,8 @@ void loop() {
   int an = 0;
   int i;
   
+  
   update_sensors();
-
   
   if (Serial.available()) {
     SerialBT.write(Serial.read());
@@ -206,4 +199,5 @@ void update_sensors() {
       SerialBT.print(PT_1_VOLTAGE);
       SerialBT.print(" ");
       SerialBT.println(PT_2_VOLTAGE);
+      
 }
