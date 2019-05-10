@@ -91,28 +91,25 @@ void loop() {
   char c = 0;
   int an = 0;
   int i;
-  int LIDAR_RANGE;
-  int PT_1_VOLTAGE;
-  int PT_2_VOLTAGE;
+
 
   
-  
+  update_sensors();
   if (Serial.available()) {
     SerialBT.write(Serial.read());
   }
   if (SerialBT.available()) {
     //Serial.write(SerialBT.read());
+    
     c = SerialBT.read();
     if(c == 'o'){
       //digitalWrite(13,HIGH);
     }
-    else if (c == 'p'){
-      //digitalWrite(13,LOW);
+    else if (c == 'd'){
+      //digitalWrite()
     }
     else if (c == 'a'){
-      an = analogRead(A2);
-      SerialBT.print("a ");
-      SerialBT.println(an);
+      
     }
     else if (c == 'x'){
       count = count + 1;
@@ -153,17 +150,31 @@ void loop() {
       ledcWrite(PWM3channel, 256);
     }
     else if (c == 'r') {
-      LIDAR_RANGE = LIDAR.readRangeContinuousMillimeters();
-      SerialBT.print(LIDAR_RANGE);
-      SerialBT.print(" ");
-      PT_1_VOLTAGE = analogRead(A2);
-      PT_2_VOLTAGE = analogRead(A3);
-      SerialBT.print("LASER_1:");
-      SerialBT.print(PT_1_VOLTAGE);
-      SerialBT.print(" ");
-      SerialBT.print("LASER_2:");
-      SerialBT.println(PT_2_VOLTAGE);
+      
+    }
+    else {
+      //update_sensors();
+      ledcWrite(PWM1channel, 0);
+      ledcWrite(PWM2channel, 0);
+      ledcWrite(PWM3channel, 0);
     }
   }
   delay(20);
+}
+
+void update_sensors() {
+      int LIDAR_RANGE;
+      int PT_1_VOLTAGE;
+      int PT_2_VOLTAGE;
+      
+      LIDAR_RANGE = LIDAR.readRangeContinuousMillimeters();
+      PT_1_VOLTAGE = analogRead(A2);
+      PT_2_VOLTAGE = analogRead(A3);
+
+      SerialBT.print("a ");
+      SerialBT.print(LIDAR_RANGE);
+      SerialBT.print(" ");
+      SerialBT.print(PT_1_VOLTAGE);
+      SerialBT.print(" ");
+      SerialBT.println(PT_2_VOLTAGE);
 }
