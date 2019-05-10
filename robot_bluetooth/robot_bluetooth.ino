@@ -19,7 +19,7 @@ int count = 0;
 const int PWM1channel = 0;
 
 #define PWM2pin 15 // RIGHT DRIVE MOTOR
-#define DIR2pin 12
+#define DIR2pin 33
 const int PWM2channel = 0;
 
 #define PWM3pin 36 // TRAWLER MOTOR
@@ -31,7 +31,7 @@ const int PWM3channel = 0;
 //const int IR_2pin = A1;
 
 #define LASER_1 27
-#define LASER_2 33
+#define LASER_2 12
 
 
 
@@ -91,10 +91,10 @@ void loop() {
   char c = 0;
   int an = 0;
   int i;
-
-
   
   update_sensors();
+
+  
   if (Serial.available()) {
     SerialBT.write(Serial.read());
   }
@@ -102,15 +102,18 @@ void loop() {
     //Serial.write(SerialBT.read());
     
     c = SerialBT.read();
+
+    // LASER TOGGLE
     if(c == 'o'){
-      //digitalWrite(13,HIGH);
+      digitalWrite(LASER_1,HIGH);
+      digitalWrite(LASER_2,HIGH);
     }
-    else if (c == 'd'){
-      //digitalWrite()
+    if(c == 'p'){
+      digitalWrite(LASER_1, LOW);
+      digitalWrite(LASER_2, LOW);
     }
-    else if (c == 'a'){
-      
-    }
+
+
     else if (c == 'x'){
       count = count + 1;
       for (i=0; i<100; i++){
@@ -123,41 +126,67 @@ void loop() {
     else if (c == 'c') {
       SerialBT.println("c 1");
     }
-    else if (c == 'w') {
-      digitalWrite(DIR1pin, LOW);
-      ledcWrite(PWM1channel, 256);
-      digitalWrite(DIR2pin, LOW);
-      ledcWrite(PWM2channel, 256);
-    }
-    else if (c == 's') {
+
+    // DRIVE CONTROLS
+    else if (c == 'w') { //FORWARD
       digitalWrite(DIR1pin, HIGH);
-      ledcWrite(PWM1channel, 256);
-      
       digitalWrite(DIR2pin, HIGH);
-      ledcWrite(PWM2channel, 256);
-    }
-    else if (c == 'b') {
-      ledcWrite(PWM1channel, 0);
-      ledcWrite(PWM2channel, 0);
-      ledcWrite(PWM3channel, 0);
-    }
-    else if (c=='q') {
-      digitalWrite(DIR3pin, LOW);
-      ledcWrite(PWM3channel, 256);
-    }
-    else if (c == 'e') {
-      digitalWrite(DIR3pin, HIGH);
-      ledcWrite(PWM3channel, 256);
-    }
-    else if (c == 'r') {
+      for (int vfinal = 0; vfinal <= 256; vfinal += 4 ) {
+        ledcWrite(PWM1channel, vfinal);
+        ledcWrite(PWM2channel, vfinal);
+      }
       
     }
-    else {
-      //update_sensors();
-      ledcWrite(PWM1channel, 0);
-      ledcWrite(PWM2channel, 0);
-      ledcWrite(PWM3channel, 0);
+    else if (c == 's') { //REVERSE
+      digitalWrite(DIR1pin, LOW);
+      digitalWrite(DIR2pin, LOW);
+      for (int vfinal = 0; vfinal <= 256; vfinal += 4 ) {
+        ledcWrite(PWM1channel, vfinal);
+        ledcWrite(PWM2channel, vfinal);
+      }
     }
+    else if (c == 'r'){ //RIGHT TURN
+      digitalWrite(DIR1pin,LOW);
+      digitalWrite(DIR2pin, HIGH);
+
+      for (int vfinal = 0; vfinal <= 256; vfinal += 4 ) {
+        ledcWrite(PWM1channel, vfinal);
+        ledcWrite(PWM2channel, vfinal);
+      }
+      
+    }
+    else if (c == 'l'){ //LEFT TURN
+      digitalWrite(DIR1pin,HIGH);
+      digitalWrite(DIR2pin, LOW);
+
+      for (int vfinal = 0; vfinal <= 256; vfinal += 4 ) {
+        ledcWrite(PWM1channel, vfinal);
+        ledcWrite(PWM2channel, vfinal);
+      }
+    }
+    else if (c == 'b') { // BRAKE
+      for (int vfinal = 256; vfinal >= 0; vfinal -= 4) {
+        ledcWrite(PWM1channel, vfinal);
+        ledcWrite(PWM2channel, vfinal);
+        ledcWrite(PWM3channel, vfinal);
+      }
+      
+    }
+
+    // BLOCK INTAKE CONTROLS
+    else if (c=='q') { // CAPTURE BLOCKS
+      digitalWrite(DIR3pin, LOW);
+      for (int vfinal = 0; vfinal <= 256; vfinal += 4 ) {
+        ledcWrite(PWM3channel, vfinal);
+      }
+    }
+    else if (c == 'e') { // EXPEL BLOCKS
+      digitalWrite(DIR3pin, HIGH);
+      for (int vfinal = 0; vfinal <= 256; vfinal += 4 ) {
+        ledcWrite(PWM3channel, vfinal);
+      }
+    }
+
   }
   delay(20);
 }
