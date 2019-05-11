@@ -6,11 +6,8 @@ HEIGHT = 750
 TITLE = "Fading Green!"
 c = 255
 x = [0]*100 # list of size 100 initialized to 0
-analog = [0, 0, 0, 0]
+analog = [0, 0, 0]
 
-currentlyTurning = False
-masterAngle = 0
-turnAngle = 0
 
 sensorValues = []
 BLOCK_THRESHOLD = 400
@@ -22,7 +19,7 @@ def draw():
     screen.draw.text(("LIDAR (mm): " + str(analog[0])), (20,10), color = "black", fontsize=15)
     screen.draw.text(("RIGHT PHOTOTRANSISTOR: " + str(analog[1])), (20, 20), color = "black", fontsize=15)
     screen.draw.text(("LEFT PHOTOTRANSISTOR: " + str(analog[2])), (20, 30), color = "black", fontsize=15)
-    screen.draw.text(("CURRENT ORIENTATION: " + str(analog[3])), (20, 40), color = "black", fontsize=15)
+    #screen.draw.text(("CURRENT ORIENTATION: " + str(analog[3])), (20, 40), color = "black", fontsize=15)
 
 
     if ((analog[1] > BLOCK_THRESHOLD) and (analog[2] < BLOCK_THRESHOLD)):
@@ -40,7 +37,6 @@ def plot(data,xpos,ypos,r,g,b):
 def update(dt):
     global c, HEIGHT
     global x, analog
-    global masterAngle, turnAngle, currentlyTurning
 
     while ser.in_waiting:
         line = ser.read_until().strip() #strip() removes the \r\n
@@ -50,10 +46,7 @@ def update(dt):
             #print(x)
         if(values[0] == 'a'):
             for idx in range(0,len(analog)):
-                if(idx == 3):
-                    analog[idx] == float(values[3])
-                else:
-                    analog[idx] = int(values[idx+1])
+                analog[idx] = int(values[idx+1])
 
 
 def on_mouse_down(button, pos):
